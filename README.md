@@ -1,5 +1,7 @@
 # Ansible Content Overview
 
+Available as a [GitHub Pages Site](https://diademiemi.github.io/ansible-content/)
+
 ## Roles
 
 - [**diademiemi.discord**](https://github.com/diademiemi/ansible_role_discord) - Maintained  ![CI Badge](https://github.com/diademiemi/ansible_role_discord/actions/workflows/molecule.yml/badge.svg)

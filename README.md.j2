@@ -1,5 +1,7 @@
 # Ansible Content Overview
 
+Available as a [GitHub Pages Site](https://diademiemi.github.io/ansible-content/)
+
 ## Roles
 {% for role in content.ansible_content.roles %}
 - [**{{ role.name }}**]({{ role.gh_url }}) - {{ role.status }} {% if role.ci_badge %} ![CI Badge]({{ role.ci_badge }}){% endif %}
