@@ -1,0 +1,16 @@
+# Ansible Content Overview
+
+## Roles
+{% for role in content.ansible_content.roles %}
+- [**{{ role.name }}**]({{ role.gh_url }}) - {{ role.status }} {% if role.ci_badge %} ![CI Badge]({{ role.ci_badge }}){% endif %}
+{% endfor %}
+
+## Collections
+{% for collection in content.ansible_content.collections %}
+- [**{{ collection.name }}**]({{ collection.gh_url }}) - {{ collection.status }}
+  - Roles:
+    {% for role in collection.roles %}
+    - [**{{ role.name }}**]({{ role.gh_url }}) - {{ role.status }} {% if role.ci_badge %} ![CI Badge]({{ role.ci_badge }}){% endif %}
+    {% endfor %}
+{% endfor %}
+

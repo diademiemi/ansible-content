@@ -1,0 +1,171 @@
+#!/usr/bin/env python3
+
+import yaml
+import argparse
+
+STATUSES = {
+    "1": "Maintained",
+    "2": "Unmaintained",
+    "3": "Deprecated"
+}
+
+def load_yaml(filename="content.yml"):
+    with open(filename, 'r') as f:
+        content = yaml.safe_load(f)
+    return content
+
+def save_yaml(data, filename="content.yml"):
+    with open(filename, 'w') as f:
+        yaml.safe_dump(data, f, default_flow_style=False)
+
+def add_new_role(content, role_name=None, ci=None, status=None):
+    if not role_name:
+        role_name = input("Enter the name of the role (e.g. diademiemi.discord or discord): ")
+    if not status:
+        status = prompt_for_status()
+    has_ci = ci if type(ci) == bool else (input("Does the role have CI? (yes/no): ").lower() == "yes")
+
+    author = content.get('default').get('author')
+    if '.' not in role_name:
+        role_name = f"{author}.{role_name}"
+
+    role_repo_name = content['default']['role_repo_name'].format(name=role_name.split('.')[1])
+    
+    ci_badge = "" if not has_ci else content['default']['role_ci_badge_url'].format(git_url=content['default']['role_git_url'].format(author=author, role_repo_name=role_repo_name), name=role_name.split('.')[1])
+    ci_url = "" if not has_ci else content['default']['role_ci_url'].format(git_url=content['default']['role_git_url'].format(author=author, role_repo_name=role_repo_name), name=role_name.split('.')[1])
+
+    role = {
+        "ci_badge": ci_badge,
+        "ci_url": ci_url,
+        "galaxy_url": content['default']['role_galaxy_url'].format(author=author, name=role_name.split('.')[1]),
+        "gh_url": content['default']['role_git_url'].format(author=author, role_repo_name=role_repo_name),
+        "name": role_name,
+        "status": status
+    }
+
+    content['ansible_content']['roles'].append(role)
+
+def interactive_mode(content):
+    choice = input("Choose an option:\n1: Add a new role\n2: Add a new collection\n3: Add a new role to an existing collection\nEnter choice: ")
+    
+    if choice == "1":
+        add_new_role(content)
+    elif choice == "2":
+        add_new_collection(content)
+    elif choice == "3":
+        role_name = input("Enter the name of the role you want to add: ")
+        collection_name = input("Enter the name of the collection to which you want to add the role: ")
+        add_role_to_collection(content, role_name, collection_name)
+
+def add_new_collection(content, collection_name=None, status=None):
+    if not status:
+        status = prompt_for_status()
+
+    if not collection_name:
+        collection_name = input("Enter the name of the collection (e.g. diademiemi.vm_utils or vm_utils): ")
+
+    author = content.get('default').get('author')
+    if '.' not in collection_name:
+        collection_name = f"{author}.{collection_name}"
+
+    collection = {
+        "galaxy_url": content['default']['collection_galaxy_url'].format(author=author, name=collection_name.split('.')[1]),
+        "gh_url": content['default']['collection_git_url'].format(author=author, collection_repo_name=content['default']['collection_repo_name'].format(author=author, name=collection_name.split('.')[1])),
+        "name": collection_name,
+        "roles": [],
+        "status": status  # This can be adjusted based on requirements
+    }
+
+    content['ansible_content']['collections'].append(collection)
+
+def add_role_to_collection(content, role_name, collection_name, ci=None, status=None):
+    if not status:
+        status = prompt_for_status()
+    has_ci = ci if ci is not None else (input("Does the role have CI? (yes/no): ").lower() == "yes")
+
+    author = content.get('default').get('author')
+    if '.' not in collection_name:
+        collection_name = f"{author}.{collection_name}"
+    if '.' not in role_name:
+        role_name = f"{collection_name}.{role_name}"
+
+    collection_repo_name = content['default']['collection_repo_name'].format(author=author, name=collection_name.split('.')[1])
+    
+    ci_badge = "" if not has_ci else content['default']['collection_role_ci_badge_url'].format(git_url=content['default']['collection_git_url'].format(author=author, collection_repo_name=collection_repo_name), name=role_name.split('.')[2])
+    ci_url = "" if not has_ci else content['default']['collection_role_ci_url'].format(git_url=content['default']['collection_git_url'].format(author=author, collection_repo_name=collection_repo_name), name=role_name.split('.')[2])
+
+    role = {
+        "ci_badge": ci_badge,
+        "ci_url": ci_url,
+        "gh_url": content['default']['collection_git_url'].format(author=author, collection_repo_name=collection_repo_name) + f"/tree/main/roles/{role_name.split('.')[2]}",
+        "name": role_name,
+        "status": status
+    }
+
+    for collection in content['ansible_content']['collections']:
+        if collection_name in collection['name']:
+            collection['roles'].append(role)
+            break
+
+def prompt_for_status():
+    print("Choose a status:")
+    for key, value in STATUSES.items():
+        print(f"{key}: {value}")
+    print("4: Custom")
+    choice = input()
+    if choice in STATUSES:
+        return STATUSES[choice]
+    elif choice == "4":
+        return input("Enter custom status: ")
+    else:
+        print("Invalid choice, defaulting to 'Maintained'.")
+        return STATUSES["1"]
+
+def determine_status_from_arg(arg_status):
+    status_map = {
+        "1": "Maintained",
+        "2": "Unmaintained",
+        "3": "Deprecated"
+    }
+
+    if arg_status in status_map:
+        return status_map[arg_status]
+    elif arg_status and arg_status not in ["1", "2", "3"]:
+        return arg_status
+    else:
+        return prompt_for_status()
+
+def main():
+    parser = argparse.ArgumentParser(description="Manage Ansible content")
+    parser.add_argument("--add-role", help="Name of the role to add", type=str)
+    parser.add_argument("--add-collection", help="Name of the collection to add", type=str)
+    parser.add_argument("--to-collection", help="Name of the collection to which you want to add the role", type=str)
+    parser.add_argument("--ci", help="Whether the role has CI (true/false)", type=str, choices=["true", "false"], default="true")
+    parser.add_argument('--status', default="1", type=str, help='Status of the role or collection. Accepts 1, 2, 3 or custom string.')
+
+    args = parser.parse_args()
+    with open('content.yml', 'r') as file:
+        content = yaml.safe_load(file)
+
+    if args.add_role:
+        if args.to_collection:
+            ci = True if args.ci == 'true' else False if args.ci == 'false' else None
+            status = determine_status_from_arg(args.status)
+            add_role_to_collection(content, args.add_role, args.to_collection, ci, status)
+        else:
+            ci = True if args.ci == 'true' else False if args.ci == 'false' else None
+            status = determine_status_from_arg(args.status)
+            add_new_role(content, args.add_role, ci, status)
+    elif args.add_collection:
+        status = determine_status_from_arg(args.status)
+        add_new_collection(content, args.add_collection, status)
+    else:
+        interactive_mode(content)
+
+    with open('content.yml', 'w') as file:
+        yaml.safe_dump(content, file)
+
+    print("Content updated successfully!")
+
+if __name__ == "__main__":
+    main()

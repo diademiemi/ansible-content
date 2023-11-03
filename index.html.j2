@@ -1,0 +1,66 @@
+<!-- template.j2 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ansible Index</title>
+</head>
+<body>
+    <h2>Roles</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>CI Badge</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for role in roles %}
+            <tr>
+                <td><a href="{{ role.gh_url }}">{{ role.name }}</a></td>
+                <td>{{ role.status }}</td>
+                <td>
+                    {% if role.ci_badge %}
+                        <a href="{{ role.ci_url }}"><img src="{{ role.ci_badge }}" alt="CI Badge"></a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Collections</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Roles</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for collection in collections %}
+            <tr>
+                <td rowspan="{{ collection.roles|length + 1 }}"><a href="{{ collection.gh_url }}">{{ collection.name }}</a></td>
+                <td rowspan="{{ collection.roles|length + 1 }}">{{ collection.status }}</td>
+            </tr>
+            {% for role in collection.roles %}
+            <tr>
+                <td>
+                    <a href="{{ role.gh_url }}">{{ role.name }}</a>
+                    {% if role.status != collection.status %}
+                        ({{ role.status }})
+                    {% endif %}
+                    {% if role.ci_badge %}
+                        <a href="{{ role.ci_url }}"><img src="{{ role.ci_badge }}" alt="CI Badge for {{ role.name }}"></a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
