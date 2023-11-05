@@ -12,7 +12,7 @@ Available as a [GitHub Pages Site](https://diademiemi.github.io/ansible-content/
 - [**{{ collection.name }}**]({{ collection.gh_url }}) - {{ collection.status }}
   - Roles:
     {% for role in collection.roles %}
-    - [**{{ role.name }}**]({{ role.gh_url }}) - {{ role.status }} {% if role.ci_badge %} [![CI Badge]({{ role.ci_badge }})]({{ role.ci_url }}){% endif %}
+    - [**{{ role.name }}**]({{ role.gh_url }}){%- if role.status != collection.status %} - {{ role.status }} {%- endif %} {% if role.ci_badge %} [![CI Badge]({{ role.ci_badge }})]({{ role.ci_url }}){% endif %}
     {% endfor %}
 {% endfor %}
 
