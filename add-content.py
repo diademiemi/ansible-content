@@ -158,13 +158,13 @@ def main():
     parser_sort_content = subparsers.add_parser('sort', help="Sort the collections and roles")
 
     # Define arguments for 'add-role'
-    parser_add_role.add_argument("--role_name", help="Name of the role to add", type=str)
+    parser_add_role.add_argument("--role-name", help="Name of the role to add", type=str)
     parser_add_role.add_argument("--ci", help="Whether the role has CI (true/false)", type=str, choices=["true", "false"], default="true")
     parser_add_role.add_argument("--status", default="1", type=str, help='Status of the role. Accepts 1, 2, 3 or custom string.')
     parser_add_role.add_argument("--to-collection", help="Name of the collection to which you want to add the role", type=str)
 
     # Define arguments for 'add-collection'
-    parser_add_collection.add_argument("--collection_name", help="Name of the collection to add", type=str)
+    parser_add_collection.add_argument("--collection-name", help="Name of the collection to add", type=str)
     parser_add_collection.add_argument("--status", default="1", type=str, help='Status of the collection. Accepts 1, 2, 3 or custom string.')
 
     # No additional arguments for 'sort'

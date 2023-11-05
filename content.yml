@@ -259,6 +259,42 @@ ansible_content:
     gh_url: https://github.com/diademiemi/ansible_role_wireguard
     name: diademiemi.wireguard
     status: Maintained
+  - ci_badge: ''
+    ci_url: ''
+    galaxy_url: https://galaxy.ansible.com/diademiemi/vagrant_libvirt
+    gh_url: https://github.com/diademiemi/ansible_role_vagrant_libvirt
+    name: diademiemi.vagrant_libvirt
+    status: Deprecated See diademiemi.hashicorp
+  - ci_badge: ''
+    ci_url: ''
+    galaxy_url: https://galaxy.ansible.com/diademiemi/msteams
+    gh_url: https://github.com/diademiemi/ansible_role_msteams
+    name: diademiemi.msteams
+    status: Deprecated
+  - ci_badge: ''
+    ci_url: ''
+    galaxy_url: https://galaxy.ansible.com/diademiemi/joplin_desktop
+    gh_url: https://github.com/diademiemi/ansible_role_joplin_desktop
+    name: diademiemi.joplin_desktop
+    status: Deprecated
+  - ci_badge: ''
+    ci_url: ''
+    galaxy_url: https://galaxy.ansible.com/diademiemi/intellij_idea
+    gh_url: https://github.com/diademiemi/ansible_role_intellij_idea
+    name: diademiemi.intellij_idea
+    status: Deprecated See diademiemi.jetbrains
+  - ci_badge: ''
+    ci_url: ''
+    galaxy_url: https://galaxy.ansible.com/diademiemi/freetube
+    gh_url: https://github.com/diademiemi/ansible_role_freetube
+    name: diademiemi.freetube
+    status: Deprecated
+  - ci_badge: ''
+    ci_url: ''
+    galaxy_url: https://galaxy.ansible.com/diademiemi/android_studio
+    gh_url: https://github.com/diademiemi/ansible_role_android_studio
+    name: diademiemi.android_studio
+    status: Deprecated See diademiemi.jetbrains
 default:
   author: diademiemi
   collection_galaxy_url: https://galaxy.ansible.com/{author}/{name}

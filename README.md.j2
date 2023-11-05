@@ -2,17 +2,38 @@
 
 Available as a [GitHub Pages Site](https://diademiemi.github.io/ansible-content/)
 
-## Roles
+## Active Roles
 {% for role in content.ansible_content.roles %}
-- [**{{ role.name }}**]({{ role.gh_url }}) - {{ role.status }} {% if role.ci_badge %} [![CI Badge]({{ role.ci_badge }})]({{ role.ci_url }}){% endif %}
+{% if not role.status.startswith("Deprecated") %}
+- [**{{ role.name }}**]({{ role.gh_url }}) - {{ role.status }} {% if role.ci_badge %}[![CI Badge]({{ role.ci_badge }})]({{ role.ci_url }}){% endif %}
+{% endif %}
 {% endfor %}
 
-## Collections
+## Active Collections
 {% for collection in content.ansible_content.collections %}
+{% if not collection.status.startswith("Deprecated") %}
 - [**{{ collection.name }}**]({{ collection.gh_url }}) - {{ collection.status }}
   - Roles:
     {% for role in collection.roles %}
-    - [**{{ role.name }}**]({{ role.gh_url }}){%- if role.status != collection.status %} - {{ role.status }} {%- endif %} {% if role.ci_badge %} [![CI Badge]({{ role.ci_badge }})]({{ role.ci_url }}){% endif %}
+    - [**{{ role.name }}**]({{ role.gh_url }}){% if role.status != collection.status %} - {{ role.status }}{% endif %} {% if role.ci_badge %}[![CI Badge]({{ role.ci_badge }})]({{ role.ci_url }}){% endif %}
     {% endfor %}
+{% endif %}
 {% endfor %}
 
+## Deprecated Roles
+{% for role in content.ansible_content.roles %}
+{% if role.status.startswith("Deprecated") %}
+- [**{{ role.name }}**]({{ role.gh_url }}) - {{ role.status[11:] }} {% if role.ci_badge %}[![CI Badge]({{ role.ci_badge }})]({{ role.ci_url }}){% endif %}
+{% endif %}
+{% endfor %}
+
+## Deprecated Collections
+{% for collection in content.ansible_content.collections %}
+{% if collection.status.startswith("Deprecated") %}
+- [**{{ collection.name }}**]({{ collection.gh_url }}) - {{ collection.status[11:] }}
+  - Roles:
+    {% for role in collection.roles %}
+    - [**{{ role.name }}**]({{ role.gh_url }}) {% if role.ci_badge %}[![CI Badge]({{ role.ci_badge }})]({{ role.ci_url }}){% endif %}
+    {% endfor %}
+{% endif %}
+{% endfor %}
