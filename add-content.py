@@ -18,6 +18,19 @@ def save_yaml(data, filename="content.yml"):
     with open(filename, 'w') as f:
         yaml.safe_dump(data, f, default_flow_style=False)
 
+def sort_content(content):
+    # Sort the collections by name
+    content['ansible_content']['collections'].sort(key=lambda x: x['name'].lower())
+
+    # Sort roles within each collection
+    for collection in content['ansible_content']['collections']:
+        collection['roles'].sort(key=lambda x: x['name'].lower())
+
+    # Also sort the standalone roles
+    content['ansible_content']['roles'].sort(key=lambda x: x['name'].lower())
+
+    return content
+
 def add_new_role(content, role_name=None, ci=None, status=None):
     if not role_name:
         role_name = input("Enter the name of the role (e.g. diademiemi.discord or discord): ")
@@ -137,35 +150,49 @@ def determine_status_from_arg(arg_status):
 
 def main():
     parser = argparse.ArgumentParser(description="Manage Ansible content")
-    parser.add_argument("--add-role", help="Name of the role to add", type=str)
-    parser.add_argument("--add-collection", help="Name of the collection to add", type=str)
-    parser.add_argument("--to-collection", help="Name of the collection to which you want to add the role", type=str)
-    parser.add_argument("--ci", help="Whether the role has CI (true/false)", type=str, choices=["true", "false"], default="true")
-    parser.add_argument('--status', default="1", type=str, help='Status of the role or collection. Accepts 1, 2, 3 or custom string.')
+    subparsers = parser.add_subparsers(dest='command')
+
+    # Add parsers for the individual commands
+    parser_add_role = subparsers.add_parser('add-role', help="Add a new role")
+    parser_add_collection = subparsers.add_parser('add-collection', help="Add a new collection")
+    parser_sort_content = subparsers.add_parser('sort', help="Sort the collections and roles")
+
+    # Define arguments for 'add-role'
+    parser_add_role.add_argument("--role_name", help="Name of the role to add", type=str)
+    parser_add_role.add_argument("--ci", help="Whether the role has CI (true/false)", type=str, choices=["true", "false"], default="true")
+    parser_add_role.add_argument("--status", default="1", type=str, help='Status of the role. Accepts 1, 2, 3 or custom string.')
+    parser_add_role.add_argument("--to-collection", help="Name of the collection to which you want to add the role", type=str)
+
+    # Define arguments for 'add-collection'
+    parser_add_collection.add_argument("--collection_name", help="Name of the collection to add", type=str)
+    parser_add_collection.add_argument("--status", default="1", type=str, help='Status of the collection. Accepts 1, 2, 3 or custom string.')
+
+    # No additional arguments for 'sort'
 
     args = parser.parse_args()
-    with open('content.yml', 'r') as file:
-        content = yaml.safe_load(file)
+    content = load_yaml('content.yml')
 
-    if args.add_role:
-        if args.to_collection:
-            ci = True if args.ci == 'true' else False if args.ci == 'false' else None
-            status = determine_status_from_arg(args.status)
-            add_role_to_collection(content, args.add_role, args.to_collection, ci, status)
-        else:
-            ci = True if args.ci == 'true' else False if args.ci == 'false' else None
-            status = determine_status_from_arg(args.status)
-            add_new_role(content, args.add_role, ci, status)
-    elif args.add_collection:
+    if args.command == 'add-role':
+        ci = args.ci == 'true'
         status = determine_status_from_arg(args.status)
-        add_new_collection(content, args.add_collection, status)
+        if args.to_collection:
+            add_role_to_collection(content, args.role_name, args.to_collection, ci, status)
+        else:
+            add_new_role(content, args.role_name, ci, status)
+    elif args.command == 'add-collection':
+        status = determine_status_from_arg(args.status)
+        add_new_collection(content, args.collection_name, status)
+    elif args.command == 'sort':
+        content = sort_content(content)
+        save_yaml(content)
+        print("Content sorted successfully!")
     else:
         interactive_mode(content)
 
-    with open('content.yml', 'w') as file:
-        yaml.safe_dump(content, file)
-
-    print("Content updated successfully!")
+    # Save the updated content to file only if a command was provided
+    if args.command:
+        save_yaml(content)
+        print("Content updated successfully!")
 
 if __name__ == "__main__":
     main()
